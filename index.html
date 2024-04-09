@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyFlix</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #121212;
+            color: white;
+        }
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 10px;
+        }
+        .movie-card {
+            background-color: #222222;
+            border-radius: 5px;
+            overflow: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+        .movie-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        .movie-card img {
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <header class="bg-dark">
+        <div class="container">
+            <h1 class="text-white">MyFlix</h1>
+            <input type="text" id="search-input" class="form-control" placeholder="Search for a movie">
+        </div>
+    </header>
+    <main>
+        <div id="movie-grid" class="container movie-grid"></div>
+    </main>
+    <footer class="bg-dark text-white text-center">
+        © 2023 MyFlix
+    </footer>
+    <script>
+        const apiKey = '1a501fcb';
+        const searchInput = document.getElementById('search-input');
+        const movieGrid = document.getElementById('movie-grid');
+
+        async function fetchMovies(searchTerm) {
+            const response = await fetch(`http://www.omdbapi.com/?s=${searchTerm}&type=movie&apikey=${apiKey}`);
+            const data = await response.json();
+            return data.Search;
+        }
+
+        async function displayMovies(movies) {
+            movieGrid.innerHTML = '';
+            for (let i = 0; i < movies.length; i++) {
+                const movie = movies[i];
+                const movieCard = document.createElement('div');
+                movieCard.classList.add('movie-card');
+                movieCard.style.cursor = 'pointer';
+                movieCard.onclick = function() {
+                    window.location.href = `movie-details.html?id=${movie.imdbID}`;
+                };
+                const img = document.createElement('img');
+                img.src = movie.Poster;
+                img.alt = `Poster for ${movie.Title}`;
+                const title = document.createElement('h2');
+                title.textContent = movie.Title;
+                const year = document.createElement('p');
+                year.textContent = `(${movie.Year})`;
+                movieCard.appendChild(img);
+                movieCard.appendChild(title);
+                movieCard.appendChild(year);
+                movieGrid.appendChild(movieCard);
+            }
+        }
+
+        searchInput.addEventListener('input', async function() {
+            const searchTerm = searchInput.value;
+            if (searchTerm.length > 0) {
+                const movies = await fetchMovies(searchTerm);
+                displayMovies(movies.slice(0, 16));
+            } else {
+                movieGrid.innerHTML = '';
+            }
+        });
+
+        window.onload = async function() {
+            const movies = await fetchMovies('');
+            displayMovies(movies.slice(0, 16));
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YQ7xtran8H3YGIFOYX1tqh" crossorigin="anonymous"></script>
+</body>
+</html>
